@@ -1,7 +1,6 @@
 package impl.mysql;
 
 import core.DatabaseAdapter;
-import core.ModelMapper;
 import core.TypeConverter;
 import core.TypeConverterRegistry;
 
@@ -9,16 +8,14 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
-public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
-    private final Connection connection;
-
-    public MySqlAdapter(Class<T> modelClass, Connection connection) {
-        super(modelClass);
-        this.connection = connection;
+public class MySqlAdapter<T> extends DatabaseAdapter<T, MySqlConnection> {
+    public MySqlAdapter(Class<T> modelClass, MySqlConnection connection) {
+        super(modelClass, connection);
     }
 
     @Override
-    protected void insertImpl(List<String> fields, List<Object> values, Map<String, Object> columns, T entity) {
+    protected void insertImpl(List<String> fields, List<Object> values, Map<String, Object> columns, T entity, MySqlConnection connection) {
+        Connection sqlConn = connection.getTrueConnection();
         StringJoiner fieldJoiner = new StringJoiner(", ");
         StringJoiner valueJoiner = new StringJoiner(", ");
         for (String col : fields) {
@@ -26,7 +23,7 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
             valueJoiner.add("?");
         }
         String sql = String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, fieldJoiner, valueJoiner);
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = sqlConn.prepareStatement(sql)) {
             for (int i = 0; i < values.size(); i++) {
                 stmt.setObject(i + 1, values.get(i));
             }
@@ -37,7 +34,8 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
     }
 
     @Override
-    protected void updateImpl(List<String> fields, List<Object> values, Map<String, Object> columns, T entity) {
+    protected void updateImpl(List<String> fields, List<Object> values, Map<String, Object> columns, T entity, MySqlConnection connection) {
+        Connection sqlConn = connection.getTrueConnection();
         StringBuilder setClause = new StringBuilder();
         Object pkValue = columns.get(primaryKey);
         int count = 0;
@@ -47,7 +45,7 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
             setClause.append(col).append(" = ?");
         }
         String sql = String.format("UPDATE %s SET %s WHERE %s = ?", tableName, setClause, primaryKey);
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = sqlConn.prepareStatement(sql)) {
             int i = 1;
             for (String col : fields) {
                 if (col.equals(primaryKey)) continue;
@@ -61,10 +59,11 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
     }
 
     @Override
-    protected void deleteImpl(Map<String, Object> columns, T entity) {
+    protected void deleteImpl(Map<String, Object> columns, T entity, MySqlConnection connection) {
+        Connection sqlConn = connection.getTrueConnection();
         Object pkValue = columns.get(primaryKey);
         String sql = String.format("DELETE FROM %s WHERE %s = ?", tableName, primaryKey);
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = sqlConn.prepareStatement(sql)) {
             stmt.setObject(1, pkValue);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -73,9 +72,10 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
     }
 
     @Override
-    protected T findByIdImpl(Object id) {
+    protected T findByIdImpl(Object id, MySqlConnection connection) {
+        Connection sqlConn = connection.getTrueConnection();
         String sql = String.format("SELECT * FROM %s WHERE %s = ?", tableName, primaryKey);
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = sqlConn.prepareStatement(sql)) {
             stmt.setObject(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -88,10 +88,11 @@ public class MySqlAdapter<T> extends core.DatabaseAdapter<T> {
     }
 
     @Override
-    protected List<T> findAllImpl() {
+    protected List<T> findAllImpl(MySqlConnection connection) {
+        Connection sqlConn = connection.getTrueConnection();
         String sql = String.format("SELECT * FROM %s", tableName);
         List<T> result = new ArrayList<>();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = sqlConn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 result.add(mapResultSet(rs));

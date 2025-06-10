@@ -11,7 +11,7 @@ public class FoodItem {
     @Column(name = "name")
     public String name;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     public double price;
 
     public FoodItem() {}

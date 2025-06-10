@@ -3,12 +3,12 @@ package impl.mysql;
 import core.DatabaseConnection;
 import core.DatabaseProvider;
 import core.DatabaseAdapter;
+import java.sql.Connection;
 import impl.mysql.converters.StringIntegerHashMapConverter;
 import java.util.HashMap;
 import core.TypeConverterRegistry;
 
-public class MySqlProvider implements DatabaseProvider {
-    private MySqlConnection connection;
+public class MySqlProvider extends DatabaseProvider<MySqlConnection, MySqlAdapter<?>> {
 
     static {
         // register type converters
@@ -16,17 +16,17 @@ public class MySqlProvider implements DatabaseProvider {
     }
 
     @Override
-    public DatabaseConnection connect(String uri) {
+    public MySqlConnection connect(String uri) {
         connection = new MySqlConnection();
         connection.init(uri);
         return connection;
     }
 
     @Override
-    public <T> DatabaseAdapter<T> getAdapter(Class<T> modelClass) {
+    public <T> MySqlAdapter<T> getAdapter(Class<T> modelClass) {
         if (connection == null || !connection.isConnected()) {
             throw new IllegalStateException("Not connected to MySQL");
         }
-        return new MySqlAdapter<>(modelClass, connection.getConnection());
+        return new MySqlAdapter<>(modelClass, connection);
     }
 }

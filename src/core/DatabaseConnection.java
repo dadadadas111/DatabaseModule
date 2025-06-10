@@ -4,7 +4,7 @@ public abstract class DatabaseConnection<Con> implements AutoCloseable {
     protected Con connection;
 
     public abstract void init(String uri);
-    public Con getConnection() {
+    public Con getTrueConnection() {
         return connection;
     }
     public abstract boolean isConnected();

@@ -8,7 +8,7 @@ public class Customer {
     @Column(name = "id")
     public String id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     public String name;
 
     public Customer() {}

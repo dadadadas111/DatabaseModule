@@ -1,7 +1,9 @@
 package core;
 
-public interface DatabaseProvider {
-    DatabaseConnection connect(String uri);
-    <T> DatabaseAdapter<T> getAdapter(Class<T> modelClass);
+public abstract class DatabaseProvider<C extends DatabaseConnection<?>, A extends DatabaseAdapter<?, C>> {
+    protected C connection;
+
+    public abstract C connect(String uri);
+    public abstract <T> A getAdapter(Class<T> modelClass);
 }
 
