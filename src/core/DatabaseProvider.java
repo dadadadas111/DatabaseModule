@@ -5,5 +5,8 @@ public abstract class DatabaseProvider<C extends DatabaseConnection<?>, A extend
 
     public abstract C connect(String uri);
     public abstract <T> A getAdapter(Class<T> modelClass);
+    public C getConnection(){
+        return connection;
+    }
 }
 

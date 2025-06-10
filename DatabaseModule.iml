@@ -7,5 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="mysql-connector-j-9.3.0" level="project" />
+    <orderEntry type="library" name="mongodb-driver-sync-5.5.1" level="project" />
+    <orderEntry type="library" name="bson-5.5.1" level="project" />
+    <orderEntry type="library" name="mongodb-driver-core-5.5.1" level="project" />
   </component>
 </module>
