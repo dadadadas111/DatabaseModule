@@ -2,6 +2,7 @@ package impl.mysql;
 
 import core.DatabaseAdapter;
 import core.ModelMapper;
+import core.TypeConverter;
 import core.TypeConverterRegistry;
 
 import java.lang.reflect.Field;

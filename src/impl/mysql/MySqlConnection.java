@@ -1,14 +1,11 @@
 package impl.mysql;
 
 import core.DatabaseConnection;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class MySqlConnection implements DatabaseConnection<Connection> {
-    private Connection connection;
-
+public class MySqlConnection extends DatabaseConnection<Connection> {
     @Override
     public void init(String uri) {
         try {
@@ -19,14 +16,9 @@ public class MySqlConnection implements DatabaseConnection<Connection> {
     }
 
     @Override
-    public Connection getConnection() {
-        return connection;
-    }
-
-    @Override
     public boolean isConnected() {
         try {
-            return !connection.isClosed();
+            return connection != null && !connection.isClosed();
         } catch (SQLException e) {
             return false;
         }
@@ -35,7 +27,9 @@ public class MySqlConnection implements DatabaseConnection<Connection> {
     @Override
     public void close() {
         try {
-            connection.close();
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
         } catch (SQLException e) {
             // do something
         }

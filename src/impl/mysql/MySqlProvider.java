@@ -3,10 +3,7 @@ package impl.mysql;
 import core.DatabaseConnection;
 import core.DatabaseProvider;
 import core.DatabaseAdapter;
-import impl.mysql.converters.DoubleConverter;
-import impl.mysql.converters.IntergerConverter;
-import impl.mysql.converters.StringConverter;
-import impl.mysql.converters.HashMapConverter;
+import impl.mysql.converters.StringIntegerHashMapConverter;
 import java.util.HashMap;
 import core.TypeConverterRegistry;
 
@@ -15,7 +12,7 @@ public class MySqlProvider implements DatabaseProvider {
 
     static {
         // register type converters
-        core.TypeConverterRegistry.register(HashMap.class, new HashMapConverter());
+        core.TypeConverterRegistry.register((Class) HashMap.class, new StringIntegerHashMapConverter());
     }
 
     @Override

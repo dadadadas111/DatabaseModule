@@ -5,7 +5,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HashMapConverter implements TypeConverter<HashMap<String, Integer>, String> {
+public class StringIntegerHashMapConverter implements TypeConverter<HashMap<String, Integer>, String> {
     @Override
     public String toDb(HashMap<String, Integer> javaValue) {
         if (javaValue == null) return null;
@@ -15,7 +15,7 @@ public class HashMapConverter implements TypeConverter<HashMap<String, Integer>,
             String value = Base64.getEncoder().encodeToString(entry.getValue().toString().getBytes());
             sb.append(key).append(":").append(value).append(",");
         }
-        if (sb.length() > 0) sb.setLength(sb.length() - 1); // remove last comma
+        if (!sb.isEmpty()) sb.setLength(sb.length() - 1); // remove last comma
         return sb.toString();
     }
 

@@ -10,12 +10,15 @@ public class TypeConverterRegistry {
         converters.put(javaType, converter);
     }
 
-    @SuppressWarnings("unchecked")
     public static <J, D> TypeConverter<J, D> get(Class<J> javaType) {
-        if (isPrimitiveOrWrapper(javaType) || javaType == String.class) {
+        if (isPrimitiveOrWrapper(javaType) || javaType == String.class || isPrimitiveArray(javaType)) {
             return null;
         }
-        return (TypeConverter<J, D>) converters.get(javaType);
+        TypeConverter<J, D> converter = (TypeConverter<J, D>) converters.get(javaType);
+        if (converter == null) {
+            throw new IllegalArgumentException("No TypeConverter registered for type: " + javaType.getName());
+        }
+        return converter;
     }
 
     private static boolean isPrimitiveOrWrapper(Class<?> clazz) {
@@ -23,6 +26,10 @@ public class TypeConverterRegistry {
                 clazz == Integer.class || clazz == Long.class || clazz == Double.class ||
                 clazz == Float.class || clazz == Short.class || clazz == Byte.class ||
                 clazz == Boolean.class || clazz == Character.class;
+    }
+
+    private static boolean isPrimitiveArray(Class<?> clazz) {
+        return clazz.isArray() && clazz.getComponentType().isPrimitive();
     }
 }
 
