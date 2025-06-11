@@ -15,17 +15,7 @@ public class MongoDbAdapter<T> extends DatabaseAdapter<T, MongoDbConnection> {
     @Override
     protected void insertImpl(List<String> fields, List<Object> values, Map<String, Object> columns, T entity, MongoDbConnection connection) {
         MongoCollection<Document> collection = connection.getTrueConnection().getCollection(tableName);
-        Document doc = new Document();
-        for (int i = 0; i < fields.size(); i++) {
-            String fieldName = fields.get(i);
-            Object value = values.get(i);
-            // Nếu là primary key, map sang _id
-            if (fieldName.equals(primaryKey)) {
-                doc.append("_id", value);
-            } else {
-                doc.append(fieldName, value);
-            }
-        }
+        Document doc = makeDoc(fields, values);
         collection.insertOne(doc);
     }
 
@@ -34,16 +24,7 @@ public class MongoDbAdapter<T> extends DatabaseAdapter<T, MongoDbConnection> {
         MongoCollection<Document> collection = connection.getTrueConnection().getCollection(tableName);
         Object pkValue = columns.get(primaryKey);
         Document filter = new Document("_id", pkValue);
-        Document update = new Document();
-        for (int i = 0; i < fields.size(); i++) {
-            String fieldName = fields.get(i);
-            Object value = values.get(i);
-            if (fieldName.equals(primaryKey)) {
-                update.append("_id", value);
-            } else {
-                update.append(fieldName, value);
-            }
-        }
+        Document update = makeDoc(fields, values);
         collection.replaceOne(filter, update);
     }
 
@@ -70,7 +51,6 @@ public class MongoDbAdapter<T> extends DatabaseAdapter<T, MongoDbConnection> {
                     field.setAccessible(true);
                     field.set(obj, doc.get(key));
                 } catch (NoSuchFieldException ignore) {
-                    // Bỏ qua nếu field không tồn tại trong model
                 }
             }
             return obj;
@@ -102,5 +82,20 @@ public class MongoDbAdapter<T> extends DatabaseAdapter<T, MongoDbConnection> {
             }
         }
         return result;
+    }
+
+    private Document makeDoc(List<String> fields, List<Object> values) {
+        Document doc = new Document();
+        for (int i = 0; i < fields.size(); i++) {
+            String fieldName = fields.get(i);
+            Object value = values.get(i);
+            // Nếu là primary key, map sang _id
+            if (fieldName.equals(primaryKey)) {
+                doc.append("_id", value);
+            } else {
+                doc.append(fieldName, value);
+            }
+        }
+        return doc;
     }
 }
